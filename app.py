@@ -2,6 +2,7 @@
 # Imports
 #----------------------------------------------------------------------------#
 
+from cmath import log
 import json
 import dateutil.parser
 import sys
@@ -106,9 +107,8 @@ def show_venue(venue_id):
 
   try:
     venue = Venue.query.get(venue_id)
-    past_shows = list(filter(lambda d: d.start_time < datetime. today(), venue.shows))
-
-    upcoming_shows = list(filter(lambda d: d.start_time >= datetime.today(), venue.shows))
+    past_shows = db.session.query(Show).join(Venue).filter(Show.venue_id==venue_id).filter(Show.start_time < datetime.now()).all()
+    upcoming_shows = db.session.query(Show).join(Venue).filter(Show.venue_id==venue_id).filter(Show.start_time >= datetime.now()).all()
 
     past_shows = list(map(lambda d: d.show_artist(), past_shows))
     upcoming_shows = list(map(lambda d: d.show_artist(),  upcoming_shows))
@@ -120,6 +120,7 @@ def show_venue(venue_id):
     data['upcoming_shows_count'] = len(upcoming_shows)
   except:
     error = True
+    print(sys.exc_info())
   finally:
     if error:
       flash('An error occurred. Venue  could not be found.')
@@ -220,8 +221,8 @@ def show_artist(artist_id):
   error = False
   try:
     artist = Artist.query.get(artist_id)
-    past_shows = list(filter(lambda d: d.start_time < datetime.today(), artist.shows))
-    upcoming_shows = list(filter(lambda d: d.start_time >=  datetime.today(), artist.shows))
+    past_shows = db.session.query(Show).join(Venue).filter(Show.artist_id==artist_id).filter(Show.start_time < datetime.now()).all()
+    upcoming_shows = db.session.query(Show).join(Venue).filter(Show.artist_id==artist_id).filter(Show.start_time >= datetime.now()).all()
     past_shows = list(map(lambda d: d.show_venue(), past_shows))
     upcoming_shows = list(map(lambda d: d.show_venue(),   upcoming_shows))
 
